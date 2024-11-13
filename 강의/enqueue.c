@@ -1,0 +1,3 @@
+insert(int pose) {
+    
+}
