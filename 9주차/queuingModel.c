@@ -166,8 +166,4 @@ int main(void) {
     if (normal_customers > 0) {
         printf("평균 대기 시간=%.3f\n", (float)total_wait / total_customers);
     }
-    // test 코드
-    printf("%d %d\n", vip_wait, vip_customers);
-    printf("%d %d\n", normal_wait, normal_customers);
-    printf("%d %d\n", total_wait, total_customers);
 }
