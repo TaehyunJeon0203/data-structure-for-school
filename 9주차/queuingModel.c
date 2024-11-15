@@ -1,3 +1,30 @@
+/*
+아래 코드는 큐를 기반으로 고객을 받고 처리한 이후, VIP 고객, 일반 고객, 전체 고객의 통계를 출력하는
+시뮬레이션 프로그램이다.
+아래 모델에서 큐는 대기 줄의 역할을 한다.
+
+시뮬레이션은 50000번 반복되며 1번 반복마다 VIP 고객은 10%, 일반 고객은 20%의 확률로 생성된다.
+
+고객이 생성된다면 고객 정보를 customer라는 이름의 구조체에 저장하게 되며,
+이 구조체는 id, arrival_time, service_time, is_vip라는 멤버 변수를 가지고 있다.
+id 는 고객의 고유한 id이며, arrival_time은 고객이 도착한 시점의 clock을 저장한다.
+service_time에는 고객의 서비스를 처리하는 데 필요한 시간 즉, 1 부터 3까지의 난수가 저장된다.
+is_vip는 해당 고객이 VIP인지 아닌지를 구분하는 변수이며, VIP라면 1, 아니라면 0을 저장한다.
+이후 해당 고객을 큐에 enqueue 하게 된다.
+
+이후 서비스를 처라하게 되는데
+먼저 현재 업무를 처리중인 고객이 있는지 확인하게 된다.
+처리중인 업무가 존재한다면(service_time이 0보다 크다면) 해당 고객의 service_time을 1 감소시킨 후 다음 clock로 넘어가게 된다.
+업무 처리 중인 고객이 없다면 큐에서 고객 한 명을 dequeue한 이후
+service_customer에 해당 고객의 id를, service_time에 해당 고객의 service_time을 저장한다.
+
+VIP고객과 일반 고객의 방문 수와, 대기 시간은 vip_wait, vip_customers, normal_wait, normal_customers 에 저장되며,
+시뮬레이션이 종료된 이무 VIP고객, 일반 고객, 전체 고객의 통계가 출력된다.
+각 통계는 전체 대기시간, 총 고객 수 그리고 평균 대기 시간으로 구성되며,
+평균 대기시간은 전체 대기시간을 총 고객 수로 나누어 출력한다.
+정수형으로 출력 시에 각 고격 등급 별로 큰 차이가 보이지 않으므로 전체 대기시간을 float 형으로 바꾸어 계산한 후 소수점 세번째 자리까지 표기한다.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -101,7 +128,7 @@ int main(void) {
             if (!is_empty(&queue)) {
                 element customer = dequeue(&queue);
                 service_customer = customer.id;
-                service_time = customer.service_time - 1;
+                service_time = customer.service_time;
 
                 int wait_time = clock - customer.arrival_time;
                 total_wait += wait_time;
@@ -123,21 +150,21 @@ int main(void) {
     printf("VIP 전체 대기 시간=%d분\n", vip_wait);
     printf("VIP 방문 수=%d\n", vip_customers);
     if (vip_customers > 0) {
-        printf("VIP 평균 대기 시간=%.2f\n", (float)vip_wait / vip_customers);
+        printf("VIP 평균 대기 시간=%.3f\n", (float)vip_wait / vip_customers);
     }
     // 일반 고객 통계
     printf("\n====일반 고객 통계====\n");
     printf("일반 고객 전체 대기 시간=%d분\n", normal_wait);
     printf("일반 고객 방문 수=%d\n", normal_customers);
     if (normal_customers > 0) {
-        printf("일반 고객 평균 대기 시간=%.2f\n", (float)normal_wait / normal_customers);
+        printf("일반 고객 평균 대기 시간=%.3f\n", (float)normal_wait / normal_customers);
     }
     // 전체 통계
     printf("\n====전체 통계====\n");
     printf("전체 대기 시간=%d분\n", total_wait);
     printf("총 고객 수=%d\n", total_customers);
     if (normal_customers > 0) {
-        printf("평균 대기 시간=%.2f\n", (float)total_wait / total_customers);
+        printf("평균 대기 시간=%.3f\n", (float)total_wait / total_customers);
     }
     // test 코드
     printf("%d %d\n", vip_wait, vip_customers);
