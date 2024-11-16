@@ -25,24 +25,24 @@ VIP고객과 일반 고객의 방문 수와, 대기 시간은 vip_wait, vip_cust
 정수형으로 출력 시에 각 고격 등급 별로 큰 차이가 보이지 않으므로 전체 대기시간을 float 형으로 바꾸어 계산한 후 소수점 세번째 자리까지 표기한다.
 
 -------------------------------------------------------------------
-위의 로직대로 구현한 결과 VIP와 일반 고객의 대기 시간에 큰 차이가 없는 결과가 나왔다.
-따라서 VIP의 큐를 따로 생성하여 VIP의 큐가 비어있지 않다면 무조건적으로 VIP 고객을 먼저 처리하는 방식으로 구현한 결과
+VIP의 큐가 비어있지 않다면 무조건적으로 VIP 고객을 먼저 처리하느 방식으로 구현한 결과
+
 ====VIP 고객 통계====
-VIP 전체 대기 시간=6684분
-VIP 방문 수=5034
-VIP 평균 대기 시간=1.328
+VIP 전체 대기 시간=6753분
+VIP 방문 수=5054
+VIP 평균 대기 시간=1.336
 
 ====일반 고객 통계====
-일반 고객 전체 대기 시간=60420분
-일반 고객 방문 수=10070
-일반 고객 평균 대기 시간=6.000
+일반 고객 전체 대기 시간=176176678분
+일반 고객 방문 수=9874
+일반 고�� 평균 대기 시간=17842.482
 
 ====전체 통계====
-전체 대기 시간=67104분
-총 고객 수=15104
-평균 대기 시간=4.443
+전체 대기 시간=176183431분
+총 고객 수=14928
+평균 대기 시간=11802.212
 
-이와 같이 VIP의 평균 대기 시간이 대폭 감소하였다.
+위와 같이 일반 고객의 대기시간이 기하급수적으로 상승하였다.
 */
 
 #include <stdio.h>
@@ -147,10 +147,11 @@ int main(void) {
             printf("고객 %d 업무처리중입니다.\n", service_customer);
             service_time--;
         } else {
-            // VIP 큐가 비어있지 않으면 VIP 먼저 처리
-            if (!is_empty(&vip_queue)) {
-                element customer = dequeue(&vip_queue);
+            static int normal_count = 0;
 
+            // VIP 큐가 비어있지 않으면 우선 처리, 단 일반 고객 3명 연속 처리는 보장
+            if (!is_empty(&vip_queue) && normal_count < 3) {
+                element customer = dequeue(&vip_queue);
                 service_customer = customer.id;
                 service_time = customer.service_time;
                 int wait_time = clock - customer.arrival_time;
@@ -158,9 +159,9 @@ int main(void) {
                 vip_wait += wait_time;
                 printf("VIP 고객 %d이 %d분에 업무를 시작합니다. 대기 시간은 %d 분이었습니다.\n",
                     customer.id, clock, wait_time);
+                normal_count = 0;
             } else if (!is_empty(&normal_queue)) {
                 element customer = dequeue(&normal_queue);
-                
                 service_customer = customer.id;
                 service_time = customer.service_time;
                 int wait_time = clock - customer.arrival_time;
@@ -168,6 +169,8 @@ int main(void) {
                 normal_wait += wait_time;
                 printf("일반 고객 %d이 %d분에 업무를 시작합니다. 대기 시간은 %d 분이었습니다.\n",
                     customer.id, clock, wait_time);
+                normal_count++;
+                if (normal_count >= 3) normal_count = 0;  // 3명 처리 후 리셋
             }
         }
     }
